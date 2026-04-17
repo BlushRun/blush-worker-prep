@@ -10,7 +10,6 @@ COMMANDS: dict[str, str] = {
     "add-workflow": "worker_prep.add_workflow",
     "export-apollo": "worker_prep.export_apollo",
     "export-template": "worker_prep.export_template",
-    "hydrate-build": "worker_prep.hydrate_build",
     "init-capability": "worker_prep.init_capability",
     "resolve-nodes": "worker_prep.resolve_nodes",
     "smoke-local": "worker_prep.runpod_local",

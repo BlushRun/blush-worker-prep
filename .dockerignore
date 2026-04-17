@@ -1,0 +1,10 @@
+.git/
+**/.git/
+.venv/
+__pycache__/
+tmp/
+submodules/*/.venv/
+submodules/*/__pycache__/
+submodules/*/.env.local
+submodules/*/tmp/
+submodules/*/volumes/
