@@ -80,6 +80,7 @@ def write_json(path: Path, data: dict | list, *, dry_run: bool) -> None:
     path.write_text(
         json.dumps(data, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
+        newline="\n",
     )
     print(f"  已写入: {path}")
 

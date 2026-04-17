@@ -12,7 +12,6 @@ TEXT_TEMPLATE_FILES = (
     "worker.toml",
     ".env.local.example",
     ".gitignore",
-    "AGENTS.md",
     "README.md",
     "Dockerfile",
     "docker-compose.yml",
@@ -89,9 +88,13 @@ def main() -> int:
     for relative in TEXT_TEMPLATE_FILES:
         path = target / relative
         rendered = replace_tokens(path.read_text(encoding="utf-8"), meta)
-        path.write_text(rendered, encoding="utf-8")
+        path.write_text(rendered, encoding="utf-8", newline="\n")
 
-    (target / ".env.local.example").write_text(render_env_file(meta), encoding="utf-8")
+    (target / ".env.local.example").write_text(
+        render_env_file(meta),
+        encoding="utf-8",
+        newline="\n",
+    )
 
     print(target)
     return 0

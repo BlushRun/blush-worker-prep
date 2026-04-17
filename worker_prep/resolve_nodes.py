@@ -76,7 +76,9 @@ class NodeMap:
                 resp.raise_for_status()
                 raw = resp.json()
                 NODE_MAP_CACHE.write_text(
-                    json.dumps(raw, ensure_ascii=False), encoding="utf-8"
+                    json.dumps(raw, ensure_ascii=False),
+                    encoding="utf-8",
+                    newline="\n",
                 )
             except Exception as e:
                 print(f"  警告: 拉取失败: {e}")
@@ -269,7 +271,7 @@ def apply_to_config(config_path: Path, nodes: list[MissingNode]) -> None:
 
     if nodes_start is None:
         # 没有 nodes 段，直接追加
-        with open(config_path, "a", encoding="utf-8") as f:
+        with open(config_path, "a", encoding="utf-8", newline="\n") as f:
             f.write("\nnodes:\n")
             for node in nodes:
                 url = node.repo_url
@@ -303,7 +305,7 @@ def apply_to_config(config_path: Path, nodes: list[MissingNode]) -> None:
 
     # 插入到 nodes 段末尾
     result = lines[:nodes_end] + new_lines + lines[nodes_end:]
-    config_path.write_text("".join(result), encoding="utf-8")
+    config_path.write_text("".join(result), encoding="utf-8", newline="\n")
 
 
 # ---------------------------------------------------------------------------

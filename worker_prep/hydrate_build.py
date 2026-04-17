@@ -6,6 +6,27 @@ from pathlib import Path
 
 from .paths import RUNTIME_DIR, resolve_repo_root
 
+TEXT_RUNTIME_SUFFIXES = {".py", ".sh", ".txt"}
+
+
+def copy_runtime_tree(src: Path, dst: Path) -> None:
+    dst.mkdir(parents=True, exist_ok=True)
+    for child in src.iterdir():
+        target = dst / child.name
+        if child.is_dir():
+            copy_runtime_tree(child, target)
+            shutil.copystat(child, target)
+            continue
+
+        if child.suffix in TEXT_RUNTIME_SUFFIXES:
+            content = child.read_text(encoding="utf-8")
+            normalized = content.replace("\r\n", "\n").replace("\r", "\n")
+            target.write_text(normalized, encoding="utf-8", newline="\n")
+            shutil.copystat(child, target)
+            continue
+
+        shutil.copy2(child, target)
+
 
 def hydrate_runtime(repo_root: Path, *, out_dir: Path | None = None, force: bool = False) -> Path:
     target = out_dir or (repo_root / ".worker-build" / "runtime")
@@ -16,7 +37,8 @@ def hydrate_runtime(repo_root: Path, *, out_dir: Path | None = None, force: bool
         shutil.rmtree(target)
 
     target.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(RUNTIME_DIR, target)
+    # Keep generated runtime assets stable across Windows and Unix checkouts.
+    copy_runtime_tree(RUNTIME_DIR, target)
     return target
 
 
