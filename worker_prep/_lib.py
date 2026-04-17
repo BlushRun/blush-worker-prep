@@ -54,6 +54,18 @@ _FIXED_RULES: set[tuple[str, str]] = {
     ("ImageResizeKJv2", "device"),
     ("LoadImage", "image"),
     ("LoadImage", "upload"),
+    ("PainterFluxImageEdit", "mode"),
+    ("KSampler", "cfg"),
+    ("KSampler", "sampler_name"),
+    ("KSampler", "scheduler"),
+    ("KSampler", "denoise"),
+    ("SolidMask", "value"),
+    ("easy imageRemBg", "rem_mode"),
+    ("easy imageRemBg", "image_output"),
+    ("easy imageRemBg", "save_prefix"),
+    ("easy imageRemBg", "torchscript_jit"),
+    ("easy imageRemBg", "add_background"),
+    ("easy imageRemBg", "refine_foreground"),
 }
 
 _EXPOSE_TITLES: set[str] = {"步长", "步数", "steps", "step", "宽", "width", "高", "height"}
@@ -217,6 +229,27 @@ def load_workflow_param_specs(workflow_name: str) -> list[dict[str, Any]] | None
     ]
 
 
+def _normalize_widget_values(
+    node_type: str,
+    node_inputs: list[dict[str, Any]],
+    widget_values: list[Any],
+) -> list[Any]:
+    widget_input_names = [
+        input_def.get("name")
+        for input_def in node_inputs
+        if isinstance(input_def, dict) and input_def.get("widget")
+    ]
+    if (
+        widget_input_names
+        and widget_input_names[0] in {"seed", "noise_seed"}
+        and len(widget_values) == len(widget_input_names) + 1
+        and isinstance(widget_values[1], str)
+        and widget_values[1] in {"fixed", "increment", "decrement", "randomize"}
+    ):
+        return [widget_values[0], *widget_values[2:]]
+    return widget_values
+
+
 def workflow_to_prompt(workflow: dict[str, Any]) -> dict[str, Any]:
     """将 ComfyUI 画布 workflow JSON 转为 API prompt 格式。"""
     links = workflow.get("links")
@@ -249,6 +282,7 @@ def workflow_to_prompt(workflow: dict[str, Any]) -> dict[str, Any]:
             raise ValueError(f"node.inputs 不是数组: {node_id}")
         if not isinstance(widget_values, list):
             raise ValueError(f"node.widgets_values 不是数组: {node_id}")
+        widget_values = _normalize_widget_values(node_type, node_inputs, widget_values)
 
         converted_inputs: dict[str, Any] = {}
         widget_index = 0
