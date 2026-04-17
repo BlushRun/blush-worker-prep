@@ -3,8 +3,8 @@ name: ${COMPOSE_PROJECT_NAME:-bw-change-me}
 services:
   comfyui-worker:
     build:
-      context: ../..
-      dockerfile: submodules/__SLUG__/Dockerfile
+      context: .
+      dockerfile: Dockerfile
       args:
         BASE_IMAGE: ${BASE_IMAGE:-__BASE_IMAGE__}
     image: ${LOCAL_IMAGE:-__REGISTRY__/blush-worker-__SLUG__:local}
