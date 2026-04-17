@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -150,6 +151,53 @@ def normalize_url(url: str) -> str:
     return url.rstrip(".git").rstrip("/")
 
 
+def repo_git_url(url: str) -> str:
+    normalized = url.rstrip("/")
+    if normalized.endswith(".git"):
+        return normalized
+    return f"{normalized}.git"
+
+
+def preferred_node_version(repo_url: str) -> str:
+    """优先返回最新 tag；没有 tag 时返回默认分支 HEAD commit；失败时回退 latest。"""
+    url = repo_git_url(repo_url)
+
+    try:
+        result = subprocess.run(
+            ["git", "ls-remote", "--tags", "--refs", "--sort=-version:refname", url],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        first_line = result.stdout.strip().splitlines()[0] if result.stdout.strip() else ""
+        if first_line:
+            ref = first_line.split()[1]
+            prefix = "refs/tags/"
+            if ref.startswith(prefix):
+                return ref[len(prefix) :]
+    except Exception:
+        pass
+
+    try:
+        result = subprocess.run(
+            ["git", "ls-remote", url, "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=30,
+        )
+        first_line = result.stdout.strip().splitlines()[0] if result.stdout.strip() else ""
+        if first_line:
+            sha = first_line.split()[0]
+            if len(sha) >= 12:
+                return sha[:12]
+    except Exception:
+        pass
+
+    return "latest"
+
+
 # ---------------------------------------------------------------------------
 # 输出 & 应用
 # ---------------------------------------------------------------------------
@@ -205,7 +253,7 @@ def apply_to_config(config_path: Path, nodes: list[MissingNode]) -> None:
         url = node.repo_url
         if not url.endswith(".git"):
             url += ".git"
-        existing.append({"url": url, "version": "latest"})
+        existing.append({"url": url, "version": preferred_node_version(url)})
 
     config["nodes"] = existing
 
@@ -227,9 +275,10 @@ def apply_to_config(config_path: Path, nodes: list[MissingNode]) -> None:
                 url = node.repo_url
                 if not url.endswith(".git"):
                     url += ".git"
+                version = preferred_node_version(url)
                 f.write(f"  # {node.title} ({node.node_type})\n")
                 f.write(f"  - url: {url}\n")
-                f.write(f"    version: latest\n\n")
+                f.write(f"    version: {version}\n\n")
         return
 
     # 找到 nodes 段结尾
@@ -247,9 +296,10 @@ def apply_to_config(config_path: Path, nodes: list[MissingNode]) -> None:
         url = node.repo_url
         if not url.endswith(".git"):
             url += ".git"
+        version = preferred_node_version(url)
         new_lines.append(f"\n  # {node.title} ({node.node_type})\n")
         new_lines.append(f"  - url: {url}\n")
-        new_lines.append(f"    version: latest\n")
+        new_lines.append(f"    version: {version}\n")
 
     # 插入到 nodes 段末尾
     result = lines[:nodes_end] + new_lines + lines[nodes_end:]
@@ -344,9 +394,10 @@ def main() -> int:
                 url = node.repo_url
                 if not url.endswith(".git"):
                     url += ".git"
+                version = preferred_node_version(url)
                 print(f"  # {node.title} ({node.node_type})")
                 print(f"  - url: {url}")
-                print(f"    version: latest")
+                print(f"    version: {version}")
                 print()
 
     # 无法解析的节点
