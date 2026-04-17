@@ -9,4 +9,4 @@ Worker work starts here.
 - workflow-specific param mapping lives with each capability under `req/*.params.spec.json`
 - pin `nodes:` to a tag or commit whenever possible; use `latest` only when pinning is not available
 - prep owns shared CLI, runtime assets, templates, and `submodules/`
-- capability repos keep only `.worker-build/`, `worker.toml`, `config.yml`, `workflows/`, `req/`, `Dockerfile`, `docker-compose.yml`, `README.md`, `AGENTS.md`
+- capability repos keep only `.worker-build/`, `worker.toml`, `config.yml`, `workflows/`, `req/`, `Dockerfile`, `docker-compose.yml`, `README.md`

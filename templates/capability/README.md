@@ -6,4 +6,4 @@ Managed from `blush-worker-prep`.
 - start here: `docker compose --env-file .env.local.example -f docker-compose.yml up --build -d`
 - declare workflow-specific param mapping in `req/*.params.spec.json` when generic extraction is not enough
 - pin `nodes:` to a tag or commit whenever possible; use `latest` only as fallback
-- keep only `.worker-build/`, `worker.toml`, `config.yml`, `workflows/`, `req/`, `Dockerfile`, `docker-compose.yml`, `README.md`, `AGENTS.md`
+- keep only `.worker-build/`, `worker.toml`, `config.yml`, `workflows/`, `req/`, `Dockerfile`, `docker-compose.yml`, `README.md`
