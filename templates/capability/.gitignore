@@ -8,7 +8,6 @@ volumes/
 .venv/
 .env.local
 tmp/
-.worker-build/
 
 __pycache__/
 .DS_Store

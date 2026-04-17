@@ -5,4 +5,4 @@
 - Shared CLI, runtime assets, and capability skeleton stay here
 - Do not move shared logic into capability repos
 - Build and compose run from each capability repo directory
-- Disposable generated dirs: `submodules/*/.worker-build`, `submodules/*/volumes/output/runpod-local`
+- Disposable generated dirs: `tmp/`, `submodules/*/volumes/output/runpod-local`
