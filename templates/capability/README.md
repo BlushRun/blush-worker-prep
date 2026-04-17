@@ -38,5 +38,5 @@ docker compose --env-file .env.local -f docker-compose.yml up --build -d
 uv --directory __PREP_SUBMODULE_PATH__ run worker-prep validate --repo .
 uv --directory __PREP_SUBMODULE_PATH__ run worker-prep resolve-nodes --repo .
 uv --directory __PREP_SUBMODULE_PATH__ run worker-prep smoke-local --repo . req/__SLUG__.api.json --dry-run
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep smoke-remote --repo . --smoke-file req/__SLUG__.smoke.remote.json --dry-run --endpoint-id demo
+uv --directory __PREP_SUBMODULE_PATH__ run worker-prep smoke-remote --repo . --smoke-file req/__SLUG__.smoke.remote.json --dry-run --base-url __LOCAL_BASE_URL__
 ```
