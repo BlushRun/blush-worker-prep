@@ -2,7 +2,6 @@
 
 Managed from `blush-worker-prep`.
 
-- run `uv run worker-prep validate --repo submodules/__SLUG__`
-- run `uv run worker-prep hydrate-build --repo submodules/__SLUG__ --force`
-- then run Docker from this repo directory
+- prepare from prep root: `uv run worker-prep validate --repo submodules/__SLUG__` then `uv run worker-prep hydrate-build --repo submodules/__SLUG__ --force`
+- start here: `docker compose --env-file .env.local.example -f docker-compose.yml up --build -d`
 - keep only `worker.toml`, `config.yml`, `workflows/`, `req/`, `Dockerfile`, `docker-compose.yml`, `README.md`, `AGENTS.md`
