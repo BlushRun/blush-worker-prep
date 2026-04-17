@@ -44,6 +44,12 @@ _FIXED_CLASS_TYPES: set[str] = {
 
 _FIXED_RULES: set[tuple[str, str]] = {
     ("ImageScaleBy", "upscale_method"),
+    ("ImageResizeKJv2", "upscale_method"),
+    ("ImageResizeKJv2", "keep_proportion"),
+    ("ImageResizeKJv2", "pad_color"),
+    ("ImageResizeKJv2", "crop_position"),
+    ("ImageResizeKJv2", "divisible_by"),
+    ("ImageResizeKJv2", "device"),
     ("LoadImage", "image"),
     ("LoadImage", "upload"),
 }
@@ -109,6 +115,7 @@ _WORKFLOW_PARAM_SPECS: dict[str, list[dict[str, Any]]] = {
             "key": "input_image",
             "title": "输入图",
             "type": "image",
+            "default": "input.png",
             "required": True,
             "targets": [("33", "image")],
             "transport": {
@@ -129,9 +136,14 @@ _WORKFLOW_PARAM_SPECS: dict[str, list[dict[str, Any]]] = {
             "targets": [("15", "guidance")],
         },
         {
-            "key": "scale_by",
-            "title": "缩放系数",
-            "targets": [("39", "scale_by")],
+            "key": "width",
+            "title": "宽度",
+            "targets": [("43", "width")],
+        },
+        {
+            "key": "height",
+            "title": "高度",
+            "targets": [("43", "height")],
         },
         {
             "key": "seed",
