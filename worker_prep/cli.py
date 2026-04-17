@@ -30,6 +30,33 @@ def usage() -> str:
     return "\n".join(lines)
 
 
+def discover_capability_repo(start: Path) -> Path | None:
+    for candidate in (start, *start.parents):
+        if (candidate / "worker.toml").exists():
+            return candidate
+    return None
+
+
+def normalize_repo_path(repo: Path) -> Path:
+    if repo.is_absolute():
+        return repo.resolve()
+
+    cwd = Path.cwd().resolve()
+    direct = (cwd / repo).resolve()
+    if (direct / "worker.toml").exists():
+        return direct
+
+    discovered = discover_capability_repo(cwd)
+    if discovered is not None:
+        if repo == Path("."):
+            return discovered
+        nested = (discovered / repo).resolve()
+        if (nested / "worker.toml").exists():
+            return nested
+
+    return direct
+
+
 def extract_repo_arg(argv: list[str]) -> tuple[Path, list[str]]:
     repo = Path(".")
     filtered: list[str] = []
@@ -48,7 +75,7 @@ def extract_repo_arg(argv: list[str]) -> tuple[Path, list[str]]:
             continue
         filtered.append(item)
         index += 1
-    return repo.resolve(), filtered
+    return normalize_repo_path(repo), filtered
 
 
 def main(argv: list[str] | None = None) -> int:
