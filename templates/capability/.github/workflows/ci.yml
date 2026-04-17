@@ -1,0 +1,18 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: astral-sh/setup-uv@v4
+      - name: Validate worker artifacts
+        run: uv --directory __PREP_SUBMODULE_PATH__ run worker-prep validate --repo .
+      - name: Validate compose config
+        run: docker compose --env-file .env.local.example -f docker-compose.yml config

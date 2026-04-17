@@ -1,0 +1,5 @@
+pyyaml
+huggingface-hub
+hf-transfer
+requests
+matplotlib

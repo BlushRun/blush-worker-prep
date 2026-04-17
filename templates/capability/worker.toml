@@ -1,0 +1,8 @@
+slug = "__SLUG__"
+display_name = "__DISPLAY_NAME__"
+registry = "__REGISTRY__"
+base_image = "__BASE_IMAGE__"
+prep_submodule_path = "__PREP_SUBMODULE_PATH__"
+prep_submodule_url = "__PREP_SUBMODULE_URL__"
+provider_key = "__PROVIDER_KEY__"
+local_slot = __LOCAL_SLOT__

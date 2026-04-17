@@ -1,0 +1,30 @@
+name: ${COMPOSE_PROJECT_NAME:-bw-change-me}
+
+services:
+  comfyui-worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BASE_IMAGE: ${BASE_IMAGE:-__BASE_IMAGE__}
+    image: ${LOCAL_IMAGE:-__REGISTRY__/blush-worker-__SLUG__:local}
+    restart: unless-stopped
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      SERVE_API_LOCALLY: "true"
+      COMFY_LOG_LEVEL: ${COMFY_LOG_LEVEL:-DEBUG}
+      NETWORK_VOLUME_DEBUG: ${NETWORK_VOLUME_DEBUG:-false}
+    ports:
+      - "${LOCAL_API_PORT:-40001}:8000"
+      - "${LOCAL_COMFYUI_PORT:-41001}:8188"
+    volumes:
+      - ./config.yml:/workspace/config.yml:ro
+      - ./workflows:/comfyui/user/default/workflows
+      - ./volumes/output:/comfyui/output
+      - ./volumes/runpod-volume:/runpod-volume

@@ -1,0 +1,21 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "blush-worker-prep"
+version = "0.1.0"
+description = "Shared CLI and runtime assets for Blush worker capability repos"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+  "pyyaml",
+  "requests",
+  "runpod",
+]
+
+[project.scripts]
+worker-prep = "worker_prep.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["worker_prep"]
