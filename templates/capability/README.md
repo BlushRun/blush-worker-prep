@@ -1,4 +1,4 @@
-# blush-worker-__SLUG__
+# __SLUG__
 
 Managed from `blush-worker-prep`.
 
