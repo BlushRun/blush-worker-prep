@@ -11,6 +11,8 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .paths import resolve_repo_root
+
 
 # -- 自动分类规则 --
 
@@ -71,99 +73,6 @@ _GENERIC_PARAM_KEYS: dict[tuple[str, str], tuple[str, str]] = {
     ("ImageScaleBy", "scale_by"): ("scale_by", "缩放系数"),
 }
 
-_WORKFLOW_PARAM_SPECS: dict[str, list[dict[str, Any]]] = {
-    "flux2-klein-9b-t2i": [
-        {
-            "key": "prompt",
-            "title": "提示词",
-            "required": True,
-            "targets": [("9", "text")],
-        },
-        {
-            "key": "seed",
-            "title": "随机种子",
-            "targets": [("8", "noise_seed")],
-        },
-        {
-            "key": "guidance",
-            "title": "引导强度",
-            "targets": [("2", "guidance")],
-        },
-        {
-            "key": "steps",
-            "title": "步数",
-            "targets": [("14", "int")],
-        },
-        {
-            "key": "width",
-            "title": "宽度",
-            "targets": [("7", "width"), ("10", "width")],
-        },
-        {
-            "key": "height",
-            "title": "高度",
-            "targets": [("7", "height"), ("10", "height")],
-        },
-        {
-            "key": "batch_size",
-            "title": "出图数量",
-            "targets": [("7", "batch_size")],
-        },
-    ],
-    "flux2-klein-9b-i2i": [
-        {
-            "key": "input_image",
-            "title": "输入图",
-            "type": "image",
-            "default": "input.png",
-            "required": True,
-            "targets": [("33", "image")],
-            "transport": {
-                "kind": "runpod_input_image",
-                "name": "input.png",
-                "format": "base64_or_data_uri",
-            },
-        },
-        {
-            "key": "prompt",
-            "title": "提示词",
-            "required": True,
-            "targets": [("19", "text")],
-        },
-        {
-            "key": "guidance",
-            "title": "引导强度",
-            "targets": [("15", "guidance")],
-        },
-        {
-            "key": "width",
-            "title": "宽度",
-            "targets": [("43", "width")],
-        },
-        {
-            "key": "height",
-            "title": "高度",
-            "targets": [("43", "height")],
-        },
-        {
-            "key": "seed",
-            "title": "随机种子",
-            "targets": [("23", "noise_seed")],
-        },
-        {
-            "key": "steps",
-            "title": "步数",
-            "targets": [("35", "int")],
-        },
-        {
-            "key": "batch_size",
-            "title": "出图数量",
-            "targets": [("25", "batch_size")],
-        },
-    ],
-}
-
-
 def load_json(path: Path) -> dict[str, Any]:
     """加载 JSON 文件，要求顶层为 object（不支持数组）。"""
     if not path.exists():
@@ -195,6 +104,117 @@ def is_comfy_prompt(data: dict[str, Any]) -> bool:
 
 def is_runpod_request(data: dict[str, Any]) -> bool:
     return isinstance(data.get("input"), dict)
+
+
+def req_dir() -> Path:
+    return resolve_repo_root() / "req"
+
+
+def workflow_param_spec_path(workflow_name: str) -> Path:
+    return req_dir() / f"{workflow_name}.params.spec.json"
+
+
+def _normalize_spec_target(
+    workflow_name: str,
+    spec_path: Path,
+    param_key: str,
+    target: Any,
+) -> tuple[str, str]:
+    if not isinstance(target, dict):
+        raise ValueError(
+            f"workflow {workflow_name} param spec target must be an object: {spec_path}"
+        )
+
+    node_id = str(target.get("node_id", "")).strip()
+    field = str(target.get("field", "")).strip()
+    if not node_id or not field:
+        raise ValueError(
+            f"workflow {workflow_name} param {param_key} target is missing node_id or field: "
+            f"{spec_path}"
+        )
+    return node_id, field
+
+
+def _normalize_param_spec_entry(
+    workflow_name: str,
+    spec_path: Path,
+    entry: Any,
+) -> dict[str, Any]:
+    if not isinstance(entry, dict):
+        raise ValueError(f"workflow {workflow_name} param spec item must be an object: {spec_path}")
+
+    key = str(entry.get("key", "")).strip()
+    title = str(entry.get("title", "")).strip()
+    targets = entry.get("targets")
+    if not key:
+        raise ValueError(f"workflow {workflow_name} param spec item is missing key: {spec_path}")
+    if not title:
+        raise ValueError(
+            f"workflow {workflow_name} param {key} is missing title in spec: {spec_path}"
+        )
+    if not isinstance(targets, list) or not targets:
+        raise ValueError(
+            f"workflow {workflow_name} param {key} must define non-empty targets: {spec_path}"
+        )
+
+    normalized: dict[str, Any] = {
+        "key": key,
+        "title": title,
+        "targets": [
+            _normalize_spec_target(workflow_name, spec_path, key, target)
+            for target in targets
+        ],
+    }
+
+    type_name = entry.get("type")
+    if type_name is not None:
+        if not isinstance(type_name, str) or not type_name.strip():
+            raise ValueError(
+                f"workflow {workflow_name} param {key} has invalid type in spec: {spec_path}"
+            )
+        normalized["type"] = type_name.strip()
+
+    if "default" in entry:
+        normalized["default"] = entry["default"]
+
+    required = entry.get("required")
+    if required is not None:
+        if not isinstance(required, bool):
+            raise ValueError(
+                f"workflow {workflow_name} param {key} required must be bool: {spec_path}"
+            )
+        normalized["required"] = required
+
+    transport = entry.get("transport")
+    if transport is not None:
+        if not isinstance(transport, dict):
+            raise ValueError(
+                f"workflow {workflow_name} param {key} transport must be an object: {spec_path}"
+            )
+        normalized["transport"] = transport
+
+    return normalized
+
+
+def load_workflow_param_specs(workflow_name: str) -> list[dict[str, Any]] | None:
+    spec_path = workflow_param_spec_path(workflow_name)
+    if not spec_path.exists():
+        return None
+
+    data = load_json(spec_path)
+    if data.get("schema_version") != 1:
+        raise ValueError(f"workflow {workflow_name} param spec must use schema_version 1: {spec_path}")
+    if data.get("workflow") != workflow_name:
+        raise ValueError(f"workflow {workflow_name} param spec workflow mismatch: {spec_path}")
+
+    params = data.get("params")
+    if not isinstance(params, list):
+        raise ValueError(f"workflow {workflow_name} param spec is missing params list: {spec_path}")
+
+    return [
+        _normalize_param_spec_entry(workflow_name, spec_path, entry)
+        for entry in params
+    ]
 
 
 def workflow_to_prompt(workflow: dict[str, Any]) -> dict[str, Any]:
@@ -479,7 +499,7 @@ def build_param_manifest(
 ) -> dict[str, Any]:
     """按“用户参数”视角生成参数清单。"""
     raw_params = extract_params(prompt, canvas)
-    specs = _WORKFLOW_PARAM_SPECS.get(workflow_name)
+    specs = load_workflow_param_specs(workflow_name)
     if specs is None:
         return _build_generic_manifest(workflow_name, raw_params)
     return _build_manifest_from_specs(workflow_name, raw_params, specs)

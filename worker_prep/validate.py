@@ -4,7 +4,13 @@ import argparse
 from pathlib import Path
 import sys
 
-from ._lib import is_canvas_workflow, is_runpod_request, load_json
+from ._lib import (
+    is_canvas_workflow,
+    is_runpod_request,
+    load_json,
+    load_workflow_param_specs,
+    workflow_param_spec_path,
+)
 from ._worker_meta import load_worker_meta
 from .paths import resolve_repo_root
 
@@ -110,10 +116,33 @@ def validate_smoke(path: Path, workflow_key: str) -> list[str]:
     return errors
 
 
+def validate_param_spec(workflow_key: str) -> list[str]:
+    spec_path = workflow_param_spec_path(workflow_key)
+    if not spec_path.exists():
+        return []
+    try:
+        load_workflow_param_specs(workflow_key)
+    except ValueError as exc:
+        return [f"{spec_path.name}: {exc}"]
+    return []
+
+
 def find_extra_req_files(workflow_keys: set[str]) -> list[str]:
     extras: list[str] = []
-    patterns = ("*.api.json", "*.params.json", "*.smoke.local.json", "*.smoke.remote.json")
-    suffixes = (".api.json", ".params.json", ".smoke.local.json", ".smoke.remote.json")
+    patterns = (
+        "*.api.json",
+        "*.params.json",
+        "*.params.spec.json",
+        "*.smoke.local.json",
+        "*.smoke.remote.json",
+    )
+    suffixes = (
+        ".api.json",
+        ".params.json",
+        ".params.spec.json",
+        ".smoke.local.json",
+        ".smoke.remote.json",
+    )
     for pattern, suffix in zip(patterns, suffixes):
         for path in req_dir().glob(pattern):
             key = path.name[: -len(suffix)]
@@ -176,6 +205,7 @@ def main() -> int:
             errors.append(f"{params_path.name}: missing params manifest")
         else:
             errors.extend(validate_params(params_path, workflow_key))
+        errors.extend(validate_param_spec(workflow_key))
 
         if not smoke_local_path.exists():
             errors.append(f"{smoke_local_path.name}: missing local smoke file")
