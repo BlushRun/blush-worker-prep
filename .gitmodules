@@ -1,6 +1,6 @@
-[submodule "submodules/flux2-klein-9b"]
-	path = submodules/flux2-klein-9b
-	url = https://github.com/BlushRun/blush-worker-flux2-klein-9b.git
+[submodule "submodules/workflow-flux2-klein-9b"]
+	path = submodules/workflow-flux2-klein-9b
+	url = https://github.com/BlushRun/workflow-flux2-klein-9b.git
 [submodule "submodules/workflow-flux2-klein-9b-changeface"]
 	path = submodules/workflow-flux2-klein-9b-changeface
-	url = https://github.com/BlushRun/blush-worker-workflow-flux2-klein-9b-changeface.git
+	url = https://github.com/BlushRun/workflow-flux2-klein-9b-changeface.git

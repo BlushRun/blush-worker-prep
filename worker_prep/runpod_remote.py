@@ -46,7 +46,7 @@ def parse_args() -> argparse.Namespace:
         "--smoke-file",
         type=Path,
         required=True,
-        help="smoke 文件路径，例如 req/flux2-klein-9b-t2i.smoke.remote.json",
+        help="smoke 文件路径，例如 req/workflow-flux2-klein-9b-t2i.smoke.remote.json",
     )
     parser.add_argument(
         "--base-url",
