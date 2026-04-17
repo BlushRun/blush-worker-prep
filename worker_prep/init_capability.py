@@ -17,7 +17,6 @@ TEXT_TEMPLATE_FILES = (
     "Dockerfile",
     "docker-compose.yml",
     "config.yml",
-    ".github/workflows/ci.yml",
 )
 
 
