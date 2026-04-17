@@ -1,6 +1,6 @@
 # blush-worker-__SLUG__
 
-`blush-worker-__SLUG__` is a lightweight capability repo. Shared tooling lives in the `__PREP_SUBMODULE_PATH__` submodule.
+`blush-worker-__SLUG__` is a lightweight capability repo. It is intended to be managed from `blush-worker-prep`.
 
 ## Fixed values
 
@@ -19,24 +19,27 @@
 ├─ workflows/
 ├─ req/
 ├─ docs/
-└─ __PREP_SUBMODULE_PATH__/
+└─ .worker-build/
 ```
 
-## Local workflow
+## Managed workflow
 
 ```bash
-git submodule update --init --recursive
+cd ../blush-worker-prep
+uv run worker-prep validate --repo submodules/__SLUG__
+uv run worker-prep hydrate-build --repo submodules/__SLUG__ --force
+uv run worker-prep export-apollo --repo submodules/__SLUG__ --provider-mode local
+cd submodules/__SLUG__
 Copy-Item .env.local.example .env.local
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep validate --repo .
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep export-apollo --repo . --provider-mode local
 docker compose --env-file .env.local -f docker-compose.yml up --build -d
 ```
 
 ## Common commands
 
 ```bash
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep validate --repo .
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep resolve-nodes --repo .
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep smoke-local --repo . req/__SLUG__.api.json --dry-run
-uv --directory __PREP_SUBMODULE_PATH__ run worker-prep smoke-remote --repo . --smoke-file req/__SLUG__.smoke.remote.json --dry-run --base-url __LOCAL_BASE_URL__
+uv run worker-prep validate --repo submodules/__SLUG__
+uv run worker-prep hydrate-build --repo submodules/__SLUG__ --force
+uv run worker-prep resolve-nodes --repo submodules/__SLUG__
+uv run worker-prep smoke-local --repo submodules/__SLUG__ submodules/__SLUG__/req/__SLUG__.api.json --dry-run
+uv run worker-prep smoke-remote --repo submodules/__SLUG__ --smoke-file submodules/__SLUG__/req/__SLUG__.smoke.remote.json --dry-run --base-url __LOCAL_BASE_URL__
 ```

@@ -1,0 +1,3 @@
+[submodule "submodules/flux2-klein-9b"]
+	path = submodules/flux2-klein-9b
+	url = https://github.com/BlushRun/blush-worker-flux2-klein-9b.git

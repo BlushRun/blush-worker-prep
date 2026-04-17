@@ -4,7 +4,7 @@
 
 - Keep this repo light
 - Keep only capability assets and committed build files here
-- Shared host scripts and runtime bootstrap live in `__PREP_SUBMODULE_PATH__`
+- Shared host scripts and runtime bootstrap are hydrated from `blush-worker-prep`
 
 ## Keep here
 
@@ -21,4 +21,5 @@
 
 - a large `dev/` toolchain
 - duplicated runtime scripts
+- a prep submodule inside the capability repo
 - a shared runtime image dependency

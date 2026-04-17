@@ -12,8 +12,6 @@ class WorkerMeta:
     display_name: str
     registry: str
     base_image: str
-    prep_submodule_path: str
-    prep_submodule_url: str
     provider_key: str
     local_slot: int
 
@@ -69,8 +67,6 @@ REQUIRED_KEYS = {
     "display_name",
     "registry",
     "base_image",
-    "prep_submodule_path",
-    "prep_submodule_url",
     "provider_key",
     "local_slot",
 }
@@ -111,8 +107,6 @@ def load_worker_meta(path: Path | None = None) -> WorkerMeta:
     display_name = str(data["display_name"]).strip()
     registry = str(data["registry"]).strip()
     base_image = str(data["base_image"]).strip()
-    prep_submodule_path = str(data["prep_submodule_path"]).strip()
-    prep_submodule_url = str(data["prep_submodule_url"]).strip()
     provider_key = str(data["provider_key"]).strip()
     local_slot = int(data["local_slot"])
 
@@ -124,10 +118,6 @@ def load_worker_meta(path: Path | None = None) -> WorkerMeta:
         raise ValueError("worker.toml registry must not be empty")
     if not base_image:
         raise ValueError("worker.toml base_image must not be empty")
-    if not prep_submodule_path:
-        raise ValueError("worker.toml prep_submodule_path must not be empty")
-    if not prep_submodule_url:
-        raise ValueError("worker.toml prep_submodule_url must not be empty")
     if not provider_key:
         raise ValueError("worker.toml provider_key must not be empty")
     if local_slot <= 0:
@@ -138,8 +128,6 @@ def load_worker_meta(path: Path | None = None) -> WorkerMeta:
         display_name=display_name,
         registry=registry,
         base_image=base_image,
-        prep_submodule_path=prep_submodule_path,
-        prep_submodule_url=prep_submodule_url,
         provider_key=provider_key,
         local_slot=local_slot,
     )

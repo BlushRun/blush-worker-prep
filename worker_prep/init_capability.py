@@ -35,16 +35,6 @@ def parse_args() -> argparse.Namespace:
         help="official base image",
     )
     parser.add_argument(
-        "--prep-submodule-path",
-        default="tools/blush-worker-prep",
-        help="relative submodule path inside the capability repo",
-    )
-    parser.add_argument(
-        "--prep-submodule-url",
-        default="https://github.com/BlushRun/blush-worker-prep.git",
-        help="submodule remote URL",
-    )
-    parser.add_argument(
         "--force",
         action="store_true",
         help="allow writing into a non-empty target directory",
@@ -70,8 +60,6 @@ def replace_tokens(text: str, meta: WorkerMeta) -> str:
         "__LOCAL_SLOT__": str(meta.local_slot),
         "__REGISTRY__": meta.registry,
         "__BASE_IMAGE__": meta.base_image,
-        "__PREP_SUBMODULE_PATH__": meta.prep_submodule_path,
-        "__PREP_SUBMODULE_URL__": meta.prep_submodule_url,
         "__LOCAL_BASE_URL__": meta.local_base_url,
     }
     rendered = text
@@ -93,8 +81,6 @@ def main() -> int:
         display_name=args.display_name.strip(),
         registry=args.registry.strip(),
         base_image=args.base_image.strip(),
-        prep_submodule_path=args.prep_submodule_path.strip(),
-        prep_submodule_url=args.prep_submodule_url.strip(),
         provider_key=args.provider_key.strip(),
         local_slot=args.local_slot,
     )
@@ -109,7 +95,6 @@ def main() -> int:
     (target / ".env.local.example").write_text(render_env_file(meta), encoding="utf-8")
 
     print(target)
-    print(f"next: git submodule add {meta.prep_submodule_url} {meta.prep_submodule_path}")
     return 0
 
 

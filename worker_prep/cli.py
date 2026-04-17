@@ -15,6 +15,7 @@ COMMANDS: dict[str, str] = {
     "resolve-nodes": "worker_prep.resolve_nodes",
     "smoke-local": "worker_prep.runpod_local",
     "smoke-remote": "worker_prep.runpod_remote",
+    "sync-submodules": "worker_prep.sync_submodules",
     "validate": "worker_prep.validate",
 }
 
